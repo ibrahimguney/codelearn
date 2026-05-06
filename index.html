@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CodeLearn AI — Kodlamayı Öğren</title>
+<meta name="description" content="AI destekli kodlama öğrenme platformu. Quiz, editör, kariyer yolu, sertifika ve daha fazlası.">
+<meta property="og:title" content="CodeLearn AI">
+<meta property="og:description" content="Kodlamayı öğrenmek için her şey bir arada.">
+<meta property="og:type" content="website">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0a0a0f;
+  --bg2: #13131a;
+  --bg3: #1c1c26;
+  --border: rgba(255,255,255,0.08);
+  --border2: rgba(255,255,255,0.14);
+  --text: #f0f0f8;
+  --text2: #9090a8;
+  --text3: #6060780;
+  --purple: #7f6ff0;
+  --purple2: #a89cf7;
+  --gold: #f5c842;
+  --red: #f05a5a;
+  --green: #4caf7d;
+  --blue: #4a9eff;
+  --font-mono: 'Space Mono', monospace;
+  --font: 'DM Sans', sans-serif;
+  --radius: 12px;
+  --radius-sm: 8px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { background: var(--bg); color: var(--text); font-family: var(--font); min-height: 100vh; overflow-x: hidden; }
+
+/* ── NAV ── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  display: flex; align-items: center; gap: 8px;
+  padding: 14px 24px;
+  background: rgba(10,10,15,0.85);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+}
+.nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+.nav-logo-icon { width: 32px; height: 32px; background: var(--purple); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-family: var(--font-mono); font-size: 14px; color: white; font-weight: 700; }
+.nav-logo-text { font-family: var(--font-mono); font-size: 16px; font-weight: 700; color: var(--text); letter-spacing: -0.5px; }
+.nav-logo-text span { color: var(--purple2); }
+.nav-links { display: flex; gap: 4px; margin-left: 20px; }
+.nav-link { padding: 6px 14px; font-size: 13px; color: var(--text2); text-decoration: none; border-radius: var(--radius-sm); transition: all 0.15s; cursor: pointer; border: none; background: none; font-family: var(--font); }
+.nav-link:hover { color: var(--text); background: rgba(255,255,255,0.06); }
+.nav-link.active { color: var(--purple2); background: rgba(127,111,240,0.12); }
+.nav-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+.xp-badge { background: rgba(127,111,240,0.15); border: 1px solid rgba(127,111,240,0.3); color: var(--purple2); font-size: 12px; font-weight: 500; padding: 4px 12px; border-radius: 20px; font-family: var(--font-mono); }
+.streak-badge { background: rgba(245,200,66,0.12); border: 1px solid rgba(245,200,66,0.25); color: var(--gold); font-size: 12px; font-weight: 500; padding: 4px 10px; border-radius: 20px; }
+
+/* ── MAIN ── */
+main { padding-top: 65px; }
+
+/* ── HERO ── */
+.hero {
+  min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 80px 24px; text-align: center; position: relative; overflow: hidden;
+}
+.hero-grid {
+  position: absolute; inset: 0; opacity: 0.04;
+  background-image: linear-gradient(var(--border2) 1px, transparent 1px), linear-gradient(90deg, var(--border2) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+.hero-glow { position: absolute; width: 600px; height: 600px; border-radius: 50%; background: radial-gradient(circle, rgba(127,111,240,0.15) 0%, transparent 70%); top: 50%; left: 50%; transform: translate(-50%,-50%); pointer-events: none; }
+.hero-tag { display: inline-flex; align-items: center; gap: 6px; background: rgba(127,111,240,0.1); border: 1px solid rgba(127,111,240,0.25); color: var(--purple2); font-size: 12px; padding: 5px 14px; border-radius: 20px; margin-bottom: 24px; letter-spacing: 0.5px; }
+.hero-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--purple); animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1}50%{opacity:0.4} }
+.hero h1 { font-family: var(--font-mono); font-size: clamp(36px,7vw,72px); font-weight: 700; line-height: 1.1; letter-spacing: -2px; margin-bottom: 20px; }
+.hero h1 .line1 { color: var(--text); }
+.hero h1 .line2 { color: var(--purple2); }
+.hero-sub { font-size: clamp(15px,2vw,18px); color: var(--text2); max-width: 560px; line-height: 1.7; margin-bottom: 36px; }
+.hero-btns { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; margin-bottom: 60px; }
+.btn-hero { padding: 14px 28px; font-size: 15px; border-radius: var(--radius); cursor: pointer; font-family: var(--font); font-weight: 500; transition: all 0.2s; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; }
+.btn-primary { background: var(--purple); color: white; border: none; }
+.btn-primary:hover { background: #6a5de0; transform: translateY(-1px); }
+.btn-outline { background: none; border: 1px solid var(--border2); color: var(--text); }
+.btn-outline:hover { border-color: var(--purple2); color: var(--purple2); background: rgba(127,111,240,0.06); }
+.hero-stats { display: flex; gap: 40px; flex-wrap: wrap; justify-content: center; }
+.hs { text-align: center; }
+.hs-num { font-family: var(--font-mono); font-size: 28px; font-weight: 700; color: var(--purple2); }
+.hs-lbl { font-size: 12px; color: var(--text2); margin-top: 3px; }
+
+/* ── FEATURES ── */
+.features { padding: 80px 24px; max-width: 1100px; margin: 0 auto; }
+.section-tag { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--purple2); font-family: var(--font-mono); margin-bottom: 12px; }
+.section-title { font-family: var(--font-mono); font-size: clamp(24px,4vw,40px); font-weight: 700; letter-spacing: -1px; margin-bottom: 12px; }
+.section-sub { font-size: 15px; color: var(--text2); max-width: 500px; line-height: 1.7; margin-bottom: 48px; }
+.features-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(280px,1fr)); gap: 16px; }
+.feat-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; transition: all 0.2s; cursor: pointer; }
+.feat-card:hover { border-color: rgba(127,111,240,0.35); background: var(--bg3); transform: translateY(-2px); }
+.feat-icon { font-size: 28px; margin-bottom: 14px; display: block; }
+.feat-title { font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 8px; }
+.feat-desc { font-size: 13px; color: var(--text2); line-height: 1.6; }
+.feat-badge { display: inline-block; font-size: 10px; padding: 2px 8px; border-radius: 6px; margin-top: 12px; font-weight: 500; }
+
+/* ── APP SECTION ── */
+.app-section { padding: 80px 24px; max-width: 1100px; margin: 0 auto; }
+
+/* ── QUIZ ── */
+.quiz-wrap { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+.quiz-topbar { display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-bottom: 1px solid var(--border); }
+.quiz-dot { width: 10px; height: 10px; border-radius: 50%; }
+.quiz-prog { flex: 1; height: 4px; background: var(--bg3); border-radius: 2px; overflow: hidden; }
+.quiz-fill { height: 4px; background: var(--purple); border-radius: 2px; transition: width 0.4s; }
+.quiz-cnt { font-size: 12px; color: var(--text2); font-family: var(--font-mono); }
+.quiz-body { padding: 24px; }
+.q-meta { display: flex; gap: 8px; margin-bottom: 14px; }
+.q-badge { font-size: 11px; padding: 3px 10px; border-radius: 20px; font-weight: 500; }
+.q-text { font-size: 16px; font-weight: 500; margin-bottom: 6px; }
+.q-code { background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px; font-family: var(--font-mono); font-size: 12px; color: #a8d8a8; margin-bottom: 16px; white-space: pre; overflow-x: auto; }
+.q-opts { display: flex; flex-direction: column; gap: 8px; }
+.q-opt { padding: 12px 16px; border: 1px solid var(--border2); border-radius: var(--radius-sm); cursor: pointer; font-size: 14px; color: var(--text); background: var(--bg3); text-align: left; transition: all 0.15s; font-family: var(--font); }
+.q-opt:hover:not(.disabled) { border-color: var(--purple); background: rgba(127,111,240,0.08); }
+.q-opt.correct { border-color: var(--green)!important; background: rgba(76,175,125,0.1)!important; color: var(--green)!important; }
+.q-opt.wrong { border-color: var(--red)!important; background: rgba(240,90,90,0.1)!important; color: var(--red)!important; }
+.q-opt.disabled { cursor: default; }
+.q-feedback { margin-top: 14px; padding: 12px 16px; border-radius: var(--radius-sm); font-size: 13px; display: none; }
+.q-feedback.show { display: block; }
+.q-feedback.correct { background: rgba(76,175,125,0.1); color: var(--green); border: 1px solid rgba(76,175,125,0.2); }
+.q-feedback.wrong { background: rgba(240,90,90,0.1); color: var(--red); border: 1px solid rgba(240,90,90,0.2); }
+.quiz-actions { display: flex; gap: 8px; margin-top: 14px; }
+.btn { padding: 8px 18px; font-size: 13px; border-radius: var(--radius-sm); cursor: pointer; transition: all 0.15s; font-family: var(--font); font-weight: 500; border: none; }
+.btn-purple { background: var(--purple); color: white; }
+.btn-purple:hover { background: #6a5de0; }
+.btn-ghost { background: none; border: 1px solid var(--border2); color: var(--text2); }
+.btn-ghost:hover { border-color: var(--purple2); color: var(--purple2); }
+.btn-sm { padding: 6px 14px; font-size: 12px; }
+.btn-green { background: var(--green); color: white; }
+
+/* ── EDITOR ── */
+.editor-wrap { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+.editor-topbar { display: flex; align-items: center; gap: 8px; padding: 10px 14px; background: var(--bg3); border-bottom: 1px solid var(--border); }
+.ed-dot { width: 10px; height: 10px; border-radius: 50%; }
+.ed-fn { font-size: 12px; color: var(--text2); font-family: var(--font-mono); margin-left: 6px; flex: 1; }
+.lang-btns { display: flex; gap: 4px; }
+.lang-btn { padding: 4px 10px; font-size: 11px; border-radius: 6px; cursor: pointer; border: 1px solid var(--border2); background: none; color: var(--text2); font-family: var(--font-mono); transition: all 0.15s; }
+.lang-btn.active { background: var(--purple); color: white; border-color: var(--purple); }
+.run-btn { padding: 5px 14px; font-size: 12px; background: var(--green); color: white; border: none; border-radius: 6px; cursor: pointer; font-family: var(--font); font-weight: 500; display: flex; align-items: center; gap: 5px; }
+.run-btn:hover { opacity: 0.9; }
+.editor-area { position: relative; }
+.line-nums { position: absolute; left: 0; top: 0; bottom: 0; width: 36px; background: var(--bg3); border-right: 1px solid var(--border); padding: 12px 0; display: flex; flex-direction: column; align-items: center; overflow: hidden; pointer-events: none; }
+.line-num { font-size: 11px; font-family: var(--font-mono); color: var(--text2); line-height: 21px; opacity: 0.5; }
+.code-ta { width: 100%; min-height: 200px; padding: 12px 12px 12px 48px; font-family: var(--font-mono); font-size: 13px; line-height: 21px; color: #c9d1d9; background: var(--bg2); border: none; resize: vertical; outline: none; tab-size: 2; }
+.output-bar { display: flex; align-items: center; gap: 8px; padding: 8px 14px; background: var(--bg3); border-top: 1px solid var(--border); }
+.out-lbl { font-size: 11px; color: var(--text2); font-family: var(--font-mono); }
+.out-status { font-size: 10px; padding: 2px 8px; border-radius: 6px; font-weight: 500; }
+.out-ok { background: rgba(76,175,125,0.15); color: var(--green); }
+.out-err { background: rgba(240,90,90,0.15); color: var(--red); }
+.out-idle { background: rgba(255,255,255,0.06); color: var(--text2); }
+.output-body { padding: 12px 14px; font-family: var(--font-mono); font-size: 12px; color: #c9d1d9; min-height: 60px; white-space: pre-wrap; line-height: 1.7; }
+.output-body.err { color: var(--red); }
+.output-body.idle { color: var(--text2); font-family: var(--font); font-size: 13px; }
+
+/* ── AI CHAT ── */
+.chat-wrap { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+.chat-header { display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-bottom: 1px solid var(--border); }
+.ai-av { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg,var(--purple),var(--purple2)); display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+.ai-name { font-size: 13px; font-weight: 600; color: var(--text); }
+.ai-status { font-size: 11px; color: var(--green); }
+.online-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); }
+.chat-msgs { padding: 16px; display: flex; flex-direction: column; gap: 12px; max-height: 320px; overflow-y: auto; }
+.msg { max-width: 80%; }
+.msg.user { align-self: flex-end; }
+.msg.ai { align-self: flex-start; }
+.msg-bubble { padding: 10px 14px; border-radius: 12px; font-size: 13px; line-height: 1.6; }
+.msg.user .msg-bubble { background: var(--purple); color: white; border-bottom-right-radius: 3px; }
+.msg.ai .msg-bubble { background: var(--bg3); color: var(--text); border: 1px solid var(--border); border-bottom-left-radius: 3px; }
+.msg-time { font-size: 10px; color: var(--text2); margin-top: 3px; padding: 0 4px; }
+.msg.user .msg-time { text-align: right; }
+.chat-input-row { display: flex; gap: 8px; padding: 12px 16px; border-top: 1px solid var(--border); }
+.chat-inp { flex: 1; padding: 9px 14px; border: 1px solid var(--border2); border-radius: 20px; font-size: 13px; font-family: var(--font); color: var(--text); background: var(--bg3); outline: none; }
+.chat-inp:focus { border-color: var(--purple); }
+.send-btn { width: 36px; height: 36px; background: var(--purple); border: none; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.send-btn svg { width: 16px; height: 16px; fill: white; }
+.quick-pills { display: flex; gap: 6px; flex-wrap: wrap; padding: 10px 16px 0; }
+.q-pill { font-size: 11px; padding: 4px 12px; border: 1px solid var(--border2); border-radius: 20px; color: var(--text2); background: none; cursor: pointer; transition: all 0.15s; font-family: var(--font); }
+.q-pill:hover { border-color: var(--purple2); color: var(--purple2); }
+.typing-dots { display: inline-flex; gap: 4px; align-items: center; }
+.typing-dots span { width: 5px; height: 5px; border-radius: 50%; background: var(--purple2); animation: td 1.2s infinite; }
+.typing-dots span:nth-child(2){animation-delay:0.2s}
+.typing-dots span:nth-child(3){animation-delay:0.4s}
+@keyframes td{0%,80%,100%{transform:scale(0.6);opacity:0.4}40%{transform:scale(1);opacity:1}}
+
+/* ── LEADERBOARD ── */
+.lb-wrap { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+.lb-header { padding: 14px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+.lb-title { font-family: var(--font-mono); font-size: 14px; font-weight: 700; color: var(--text); }
+.lb-live { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--red); font-weight: 500; }
+.lb-live-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--red); animation: pulse 1s infinite; }
+.lb-list { padding: 8px; }
+.lb-row { display: flex; align-items: center; gap: 12px; padding: 10px 10px; border-radius: var(--radius-sm); transition: all 0.15s; }
+.lb-row:hover { background: rgba(255,255,255,0.04); }
+.lb-row.me { background: rgba(127,111,240,0.08); border: 1px solid rgba(127,111,240,0.2); }
+.lb-rank { font-size: 14px; width: 24px; text-align: center; font-family: var(--font-mono); font-weight: 700; }
+.lb-av { font-size: 20px; width: 34px; height: 34px; border-radius: 50%; background: var(--bg3); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.lb-name { flex: 1; font-size: 13px; font-weight: 500; color: var(--text); }
+.lb-streak { font-size: 12px; color: var(--gold); }
+.lb-xp { font-size: 13px; font-weight: 700; color: var(--purple2); font-family: var(--font-mono); }
+
+/* ── CAREER ── */
+.career-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(200px,1fr)); gap: 12px; }
+.career-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; cursor: pointer; transition: all 0.2s; text-align: center; }
+.career-card:hover { transform: translateY(-2px); border-color: var(--purple); }
+.career-card.selected { border: 2px solid var(--purple); background: rgba(127,111,240,0.08); }
+.career-icon { font-size: 32px; margin-bottom: 10px; display: block; }
+.career-title { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+.career-desc { font-size: 12px; color: var(--text2); }
+.roadmap { margin-top: 20px; display: flex; flex-direction: column; gap: 8px; }
+.rm-step { display: flex; align-items: center; gap: 12px; padding: 12px 14px; background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius-sm); cursor: pointer; transition: all 0.15s; }
+.rm-step:hover { border-color: var(--purple2); }
+.rm-step.done { opacity: 0.6; }
+.rm-dot { width: 16px; height: 16px; border-radius: 50%; border: 2px solid var(--border2); flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 8px; }
+.rm-dot.done { background: var(--purple); border-color: var(--purple); }
+.rm-dot.active { border-color: var(--purple2); }
+.rm-info { flex: 1; }
+.rm-title { font-size: 13px; font-weight: 500; color: var(--text); }
+.rm-sub { font-size: 11px; color: var(--text2); margin-top: 2px; }
+.rm-xp { font-size: 12px; color: var(--purple2); font-family: var(--font-mono); }
+
+/* ── BADGES ── */
+.badges-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(120px,1fr)); gap: 10px; }
+.badge-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; text-align: center; transition: all 0.15s; }
+.badge-card.earned { border-color: rgba(127,111,240,0.4); }
+.badge-card.locked { opacity: 0.35; }
+.badge-card:hover:not(.locked) { transform: translateY(-2px); border-color: var(--purple2); }
+.badge-icon { font-size: 28px; display: block; margin-bottom: 8px; }
+.badge-name { font-size: 12px; font-weight: 500; color: var(--text); }
+.badge-desc { font-size: 10px; color: var(--text2); margin-top: 3px; line-height: 1.4; }
+
+/* ── CTA ── */
+.cta { padding: 100px 24px; text-align: center; position: relative; overflow: hidden; }
+.cta-glow { position: absolute; width: 500px; height: 300px; border-radius: 50%; background: radial-gradient(circle, rgba(127,111,240,0.12) 0%, transparent 70%); top: 50%; left: 50%; transform: translate(-50%,-50%); }
+.cta h2 { font-family: var(--font-mono); font-size: clamp(28px,5vw,52px); font-weight: 700; letter-spacing: -1.5px; margin-bottom: 16px; }
+.cta p { font-size: 16px; color: var(--text2); margin-bottom: 36px; }
+
+/* ── FOOTER ── */
+footer { border-top: 1px solid var(--border); padding: 32px 24px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+.footer-logo { font-family: var(--font-mono); font-size: 14px; color: var(--text2); }
+.footer-logo span { color: var(--purple2); }
+.footer-links { display: flex; gap: 20px; }
+.footer-link { font-size: 13px; color: var(--text2); text-decoration: none; transition: color 0.15s; }
+.footer-link:hover { color: var(--text); }
+.footer-copy { font-size: 12px; color: var(--text2); }
+
+/* ── PAGE SECTIONS ── */
+.page { display: none; }
+.page.active { display: block; }
+.page-wrap { max-width: 900px; margin: 0 auto; padding: 80px 24px 40px; }
+.page-title { font-family: var(--font-mono); font-size: 28px; font-weight: 700; letter-spacing: -1px; margin-bottom: 6px; }
+.page-sub { font-size: 14px; color: var(--text2); margin-bottom: 32px; }
+.card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin-bottom: 12px; }
+.card-title { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 14px; display: flex; align-items: center; gap: 6px; }
+.stats-row { display: grid; grid-template-columns: repeat(auto-fill,minmax(120px,1fr)); gap: 10px; margin-bottom: 16px; }
+.stat-card { background: var(--bg3); border-radius: var(--radius-sm); padding: 14px; text-align: center; }
+.stat-num { font-size: 22px; font-weight: 700; font-family: var(--font-mono); color: var(--purple2); }
+.stat-lbl { font-size: 11px; color: var(--text2); margin-top: 3px; }
+
+/* ── PROGRESS BARS ── */
+.prog-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.prog-label { font-size: 12px; color: var(--text); width: 100px; flex-shrink: 0; }
+.prog-bar { flex: 1; height: 6px; background: var(--bg3); border-radius: 3px; overflow: hidden; }
+.prog-fill { height: 6px; border-radius: 3px; transition: width 0.8s ease; }
+.prog-val { font-size: 11px; color: var(--text2); width: 30px; text-align: right; font-family: var(--font-mono); }
+
+/* ── TOAST ── */
+.toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px); background: var(--bg3); border: 1px solid var(--border2); color: var(--text); padding: 12px 20px; border-radius: var(--radius); font-size: 14px; font-weight: 500; transition: transform 0.4s ease; z-index: 999; white-space: nowrap; pointer-events: none; box-shadow: 0 8px 32px rgba(0,0,0,0.4); }
+.toast.show { transform: translateX(-50%) translateY(0); }
+
+/* ── RESPONSIVE ── */
+@media(max-width:640px) {
+  nav { padding: 12px 16px; }
+  .nav-links { display: none; }
+  .page-wrap { padding: 72px 16px 32px; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-logo" href="#" onclick="showHome()">
+    <div class="nav-logo-icon">{}</div>
+    <span class="nav-logo-text">Code<span>Learn</span></span>
+  </a>
+  <div class="nav-links">
+    <button class="nav-link active" id="nl-home" onclick="showPage('home')">Ana Sayfa</button>
+    <button class="nav-link" id="nl-quiz" onclick="showPage('quiz')">Quiz</button>
+    <button class="nav-link" id="nl-editor" onclick="showPage('editor')">Editör</button>
+    <button class="nav-link" id="nl-ai" onclick="showPage('ai')">AI Öğretmen</button>
+    <button class="nav-link" id="nl-career" onclick="showPage('career')">Kariyer</button>
+    <button class="nav-link" id="nl-badges" onclick="showPage('badges')">Rozetler</button>
+    <button class="nav-link" id="nl-lb" onclick="showPage('lb')">Liderlik</button>
+  </div>
+  <div class="nav-right">
+    <span class="xp-badge" id="navXP">0 XP</span>
+    <span class="streak-badge" id="navStreak">0🔥</span>
+  </div>
+</nav>
+
+<main>
+<!-- HOME PAGE -->
+<div class="page active" id="page-home">
+  <div class="hero">
+    <div class="hero-grid"></div>
+    <div class="hero-glow"></div>
+    <div class="hero-tag"><div class="hero-dot"></div>AI Destekli Öğrenme Platformu</div>
+    <h1>
+      <div class="line1">Kodu öğren,</div>
+      <div class="line2">kariyer inşa et.</div>
+    </h1>
+    <p class="hero-sub">Quiz, canlı editör, AI öğretmen, kariyer yolu, sertifika ve daha fazlasıyla kodlamayı hızla öğren.</p>
+    <div class="hero-btns">
+      <a class="btn-hero btn-primary" href="#" onclick="showPage('quiz')">⚡ Hemen Başla</a>
+      <a class="btn-hero btn-outline" href="#features">Özellikleri Gör →</a>
+    </div>
+    <div class="hero-stats">
+      <div class="hs"><div class="hs-num">15+</div><div class="hs-lbl">Özellik</div></div>
+      <div class="hs"><div class="hs-num">4</div><div class="hs-lbl">Kariyer Yolu</div></div>
+      <div class="hs"><div class="hs-num">∞</div><div class="hs-lbl">AI Ders</div></div>
+      <div class="hs"><div class="hs-num">6</div><div class="hs-lbl">Sertifika</div></div>
+    </div>
+  </div>
+
+  <div class="features" id="features">
+    <div class="section-tag">// ÖZELLİKLER</div>
+    <h2 class="section-title">Her şey bir arada</h2>
+    <p class="section-sub">Kodlamayı öğrenmek için ihtiyacın olan tüm araçlar tek platformda.</p>
+    <div class="features-grid">
+      <div class="feat-card" onclick="showPage('quiz')"><span class="feat-icon">🎯</span><div class="feat-title">Adaptif Quiz</div><div class="feat-desc">AI destekli sorular, anında geri bildirim ve zayıf konuları tespit etme.</div><span class="feat-badge" style="background:rgba(76,175,125,0.15);color:#4caf7d;">Aktif</span></div>
+      <div class="feat-card" onclick="showPage('editor')"><span class="feat-icon">💻</span><div class="feat-title">Canlı Kod Editörü</div><div class="feat-desc">Python, JS, SQL destekli editör. AI kod incelemesi ve çıktı simülasyonu.</div><span class="feat-badge" style="background:rgba(127,111,240,0.15);color:#a89cf7;">Yeni</span></div>
+      <div class="feat-card" onclick="showPage('ai')"><span class="feat-icon">🤖</span><div class="feat-title">AI Öğretmen</div><div class="feat-desc">Gerçek zamanlı sohbet. Her soruyu anlık yanıtlayan kişisel AI öğretmenin.</div><span class="feat-badge" style="background:rgba(127,111,240,0.15);color:#a89cf7;">Aktif</span></div>
+      <div class="feat-card" onclick="showPage('career')"><span class="feat-icon">🗺️</span><div class="feat-title">Kariyer Yolu</div><div class="feat-desc">Frontend, Backend, Veri Bilimi ve Mobil için kişiselleştirilmiş müfredat.</div><span class="feat-badge" style="background:rgba(245,200,66,0.12);color:#f5c842;">Popüler</span></div>
+      <div class="feat-card" onclick="showPage('badges')"><span class="feat-icon">🏅</span><div class="feat-title">Rozet & Seviye</div><div class="feat-desc">10+ rozet, 6 seviye, XP sistemi. Her başarın kutlanır.</div><span class="feat-badge" style="background:rgba(76,175,125,0.15);color:#4caf7d;">Aktif</span></div>
+      <div class="feat-card" onclick="showPage('lb')"><span class="feat-icon">🏆</span><div class="feat-title">Liderlik Tablosu</div><div class="feat-desc">Global sıralama. Diğer öğrencilerle yarış, zirveye çık.</div><span class="feat-badge" style="background:rgba(240,90,90,0.15);color:#f05a5a;">Canlı</span></div>
+      <div class="feat-card"><span class="feat-icon">🎙️</span><div class="feat-title">Sesli AI Öğretmen</div><div class="feat-desc">Sesinle sor, AI sesli yanıt versin. Eller serbest öğrenme modu.</div><span class="feat-badge" style="background:rgba(127,111,240,0.15);color:#a89cf7;">Beta</span></div>
+      <div class="feat-card"><span class="feat-icon">🎓</span><div class="feat-title">Sertifikalar</div><div class="feat-desc">Tamamlanan kariyer yolları için resmi sertifika. İndirilebilir PDF.</div><span class="feat-badge" style="background:rgba(245,200,66,0.12);color:#f5c842;">Yakında</span></div>
+      <div class="feat-card"><span class="feat-icon">📒</span><div class="feat-title">Çalışma Defteri</div><div class="feat-desc">Not al, flashcard oluştur, AI ile özetle. Bilgini kalıcı yap.</div><span class="feat-badge" style="background:rgba(76,175,125,0.15);color:#4caf7d;">Aktif</span></div>
+    </div>
+  </div>
+
+  <div class="cta">
+    <div class="cta-glow"></div>
+    <h2>Kodlamayı bugün başlat.</h2>
+    <p>Ücretsiz, sınırsız, AI destekli.</p>
+    <a class="btn-hero btn-primary" href="#" onclick="showPage('quiz')">⚡ Quiz'e Başla</a>
+  </div>
+</div>
+
+<!-- QUIZ PAGE -->
+<div class="page" id="page-quiz">
+  <div class="page-wrap">
+    <div class="page-title">🎯 Quiz</div>
+    <p class="page-sub">Doğru cevapla XP kazan, liderlik tablosunda yüksel</p>
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-num" id="qzCorrect">0</div><div class="stat-lbl">Doğru</div></div>
+      <div class="stat-card"><div class="stat-num" id="qzTotal">0</div><div class="stat-lbl">Toplam</div></div>
+      <div class="stat-card"><div class="stat-num" id="qzXP">0</div><div class="stat-lbl">XP</div></div>
+      <div class="stat-card"><div class="stat-num" id="qzStreak">0🔥</div><div class="stat-lbl">Seri</div></div>
+    </div>
+    <div class="quiz-wrap">
+      <div class="quiz-topbar">
+        <div class="quiz-dot" style="background:#E24B4A;"></div>
+        <div class="quiz-dot" style="background:#EF9F27;"></div>
+        <div class="quiz-dot" style="background:#4caf7d;"></div>
+        <div class="quiz-prog"><div class="quiz-fill" id="quizProg" style="width:0%"></div></div>
+        <div class="quiz-cnt" id="quizCnt">1 / 8</div>
+      </div>
+      <div class="quiz-body">
+        <div class="q-meta" id="qMeta"></div>
+        <div class="q-text" id="qText"></div>
+        <div class="q-code" id="qCode" style="display:none;"></div>
+        <div class="q-opts" id="qOpts"></div>
+        <div class="q-feedback" id="qFeedback"></div>
+        <div class="quiz-actions">
+          <button class="btn btn-purple" id="qNext" onclick="nextQ()" style="display:none;">Sonraki →</button>
+          <button class="btn btn-ghost btn-sm" onclick="aiExplain()">🤖 Açıkla</button>
+        </div>
+        <div id="qAIBox" style="display:none;margin-top:12px;background:rgba(127,111,240,0.06);border:1px solid rgba(127,111,240,0.2);border-radius:8px;padding:12px;font-size:13px;color:var(--text2);line-height:1.7;"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- EDITOR PAGE -->
+<div class="page" id="page-editor">
+  <div class="page-wrap">
+    <div class="page-title">💻 Kod Editörü</div>
+    <p class="page-sub">Yaz, çalıştır, AI ile incele</p>
+    <div class="editor-wrap">
+      <div class="editor-topbar">
+        <div class="ed-dot" style="background:#E24B4A;"></div>
+        <div class="ed-dot" style="background:#EF9F27;"></div>
+        <div class="ed-dot" style="background:#4caf7d;"></div>
+        <span class="ed-fn" id="edFn">main.py</span>
+        <div class="lang-btns">
+          <button class="lang-btn active" onclick="setLang('python',this)">Python</button>
+          <button class="lang-btn" onclick="setLang('javascript',this)">JavaScript</button>
+          <button class="lang-btn" onclick="setLang('sql',this)">SQL</button>
+        </div>
+        <button class="run-btn" onclick="runCode()">▶ Çalıştır</button>
+      </div>
+      <div class="editor-area">
+        <div class="line-nums" id="lineNums"></div>
+        <textarea class="code-ta" id="codeEd" spellcheck="false" oninput="updateLN()" onkeydown="handleTab(event)">for i in range(1, 21):
+    if i % 15 == 0:
+        print("FizzBuzz")
+    elif i % 3 == 0:
+        print("Fizz")
+    elif i % 5 == 0:
+        print("Buzz")
+    else:
+        print(i)</textarea>
+      </div>
+      <div class="output-bar">
+        <span class="out-lbl">Çıktı</span>
+        <span class="out-status out-idle" id="outStat">Hazır</span>
+        <button class="btn btn-ghost btn-sm" style="margin-left:auto;" onclick="aiReview()">🤖 AI İncele</button>
+      </div>
+      <div class="output-body idle" id="outBody">Çalıştır butonuna bas →</div>
+    </div>
+    <div id="reviewBox" style="display:none;margin-top:12px;background:rgba(127,111,240,0.06);border:1px solid rgba(127,111,240,0.2);border-radius:8px;padding:14px;font-size:13px;color:var(--text2);line-height:1.7;"></div>
+  </div>
+</div>
+
+<!-- AI PAGE -->
+<div class="page" id="page-ai">
+  <div class="page-wrap">
+    <div class="page-title">🤖 AI Öğretmen</div>
+    <p class="page-sub">Her kodlama sorusunu anlık yanıtlar</p>
+    <div class="chat-wrap">
+      <div class="chat-header">
+        <div class="ai-av">🤖</div>
+        <div>
+          <div class="ai-name">CodeLearn AI</div>
+          <div class="ai-status">● Çevrimiçi</div>
+        </div>
+        <div class="online-dot" style="margin-left:auto;"></div>
+      </div>
+      <div class="quick-pills">
+        <button class="q-pill" onclick="quickChat('Python listeler nasıl çalışır?')">Python listeler</button>
+        <button class="q-pill" onclick="quickChat('JavaScript async/await nedir?')">Async/await</button>
+        <button class="q-pill" onclick="quickChat('SQL JOIN türlerini açıkla')">SQL JOIN</button>
+        <button class="q-pill" onclick="quickChat('Big O notasyonu nedir?')">Big O</button>
+        <button class="q-pill" onclick="quickChat('OOP prensipleri nelerdir?')">OOP</button>
+      </div>
+      <div class="chat-msgs" id="chatMsgs">
+        <div class="msg ai"><div class="msg-bubble">Merhaba! 👋 Python, JavaScript, SQL veya herhangi bir kodlama konusunda sorularını yanıtlamaya hazırım. Ne öğrenmek istersin?</div><div class="msg-time">Şimdi</div></div>
+      </div>
+      <div class="chat-input-row">
+        <input class="chat-inp" id="chatInp" placeholder="Soru sor..." onkeydown="if(event.key==='Enter')sendChat()">
+        <button class="send-btn" onclick="sendChat()"><svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CAREER PAGE -->
+<div class="page" id="page-career">
+  <div class="page-wrap">
+    <div class="page-title">🗺️ Kariyer Yolu</div>
+    <p class="page-sub">Hedefini seç, müfredat sana göre şekillensin</p>
+    <div class="career-grid" id="careerGrid"></div>
+    <div id="roadmapWrap" style="margin-top:20px;"></div>
+  </div>
+</div>
+
+<!-- BADGES PAGE -->
+<div class="page" id="page-badges">
+  <div class="page-wrap">
+    <div class="page-title">🏅 Rozetler & Seviyeler</div>
+    <p class="page-sub">Her başarın bir rozet kazandırır</p>
+    <div class="card" style="margin-bottom:16px;">
+      <div style="display:flex;align-items:center;gap:14px;">
+        <div style="font-size:36px;">🧑‍💻</div>
+        <div style="flex:1;">
+          <div style="font-size:16px;font-weight:600;color:var(--text);">CodeLearn Öğrencisi</div>
+          <div style="font-size:12px;background:rgba(127,111,240,0.15);color:var(--purple2);padding:3px 10px;border-radius:10px;display:inline-block;margin-top:4px;" id="levelTag">Seviye 1 — Çaylak</div>
+          <div style="display:flex;align-items:center;gap:8px;margin-top:8px;">
+            <span style="font-size:12px;color:var(--text2);" id="xpLbl">0 XP</span>
+            <div style="flex:1;height:5px;background:var(--bg3);border-radius:3px;overflow:hidden;"><div style="height:5px;background:var(--purple);border-radius:3px;transition:width 0.5s;" id="xpBar" style="width:0%"></div></div>
+            <span style="font-size:12px;color:var(--purple2);" id="xpNext">100 XP</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="font-size:12px;color:var(--text2);margin-bottom:10px;font-family:var(--font-mono);">// KAZANILAN ROZETLER</div>
+    <div class="badges-grid" id="earnedBadges"></div>
+    <div style="font-size:12px;color:var(--text2);margin:16px 0 10px;font-family:var(--font-mono);">// KİLİTLİ ROZETLER</div>
+    <div class="badges-grid" id="lockedBadges"></div>
+  </div>
+</div>
+
+<!-- LEADERBOARD PAGE -->
+<div class="page" id="page-lb">
+  <div class="page-wrap">
+    <div class="page-title">🏆 Liderlik Tablosu</div>
+    <p class="page-sub">Global sıralama — zirveye ulaş</p>
+    <div class="lb-wrap">
+      <div class="lb-header">
+        <div class="lb-title">// GLOBAL RANKING</div>
+        <div class="lb-live"><div class="lb-live-dot"></div>CANLI</div>
+      </div>
+      <div class="lb-list" id="lbList"></div>
+    </div>
+  </div>
+</div>
+</main>
+
+<footer>
+  <div class="footer-logo">Code<span>Learn</span> AI — 2024</div>
+  <div class="footer-links">
+    <a class="footer-link" href="#" onclick="showPage('quiz')">Quiz</a>
+    <a class="footer-link" href="#" onclick="showPage('editor')">Editör</a>
+    <a class="footer-link" href="#" onclick="showPage('ai')">AI</a>
+    <a class="footer-link" href="#" onclick="showPage('career')">Kariyer</a>
+  </div>
+  <div class="footer-copy">Anthropic Claude API ile güçlendirildi</div>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const QUESTIONS=[
+  {lang:'Python',lk:'python',diff:'Kolay',dk:'easy',text:"Python'da listeye eleman eklemek için?",code:null,opts:['list.add()','list.append()','list.insert()','list.push()'],correct:1,xp:10},
+  {lang:'JavaScript',lk:'js',diff:'Kolay',dk:'easy',text:"JavaScript'te sabit değişken için ne kullanılır?",code:null,opts:['var','let','const','static'],correct:2,xp:10},
+  {lang:'Python',lk:'python',diff:'Orta',dk:'medium',text:"Bu kodun çıktısı ne olur?",code:"x = [1, 2, 3]\nprint(x[-1])",opts:['1','3','-1','Hata'],correct:1,xp:20},
+  {lang:'SQL',lk:'sql',diff:'Kolay',dk:'easy',text:"SQL'de benzersiz değerler için ne kullanılır?",code:null,opts:['UNIQUE','DISTINCT','ONLY','DIFFERENT'],correct:1,xp:10},
+  {lang:'JavaScript',lk:'js',diff:'Orta',dk:'medium',text:"Bu kodun çıktısı ne olur?",code:"console.log(typeof null);",opts:['"null"','"undefined"','"object"','"boolean"'],correct:2,xp:20},
+  {lang:'Python',lk:'python',diff:'Orta',dk:'medium',text:"Sözlükte olmayan anahtara güvenli erişim?",code:null,opts:['dict[key]','dict.get(key)','dict.find(key)','dict.fetch(key)'],correct:1,xp:20},
+  {lang:'SQL',lk:'sql',diff:'Orta',dk:'medium',text:"Sonuçları gruplamak için hangi ifade?",code:"SELECT ülke, COUNT(*) FROM m\n_____ ülke;",opts:['ORDER BY','GROUP BY','SORT BY','CLUSTER BY'],correct:1,xp:20},
+  {lang:'JavaScript',lk:'js',diff:'Zor',dk:'hard',text:"Bu kodun çıktısı?",code:"const a=[1,2,3];\nconst [x,...r]=a;\nconsole.log(r);",opts:['[1]','[2,3]','[1,2]','[3]'],correct:1,xp:30},
+];
+const BADGES_DEF=[
+  {id:'first',icon:'🎯',name:'İlk Adım',desc:'İlk doğru cevap',cond:s=>s.correct>=1},
+  {id:'hat',icon:'🎩',name:'Şapka Numarası',desc:'3 art arda doğru',cond:s=>s.streak>=3},
+  {id:'coder',icon:'💻',name:'Gerçek Kodcu',desc:'Kod çalıştır',cond:s=>s.runs>=1},
+  {id:'reviewer',icon:'🔍',name:'Kod Dedektifi',desc:'AI incelemesi kullan',cond:s=>s.reviews>=1},
+  {id:'curious',icon:'🤖',name:'AI Meraklısı',desc:'AI öğretmene sor',cond:s=>s.aiAsked>=1},
+  {id:'career',icon:'🗺️',name:'Kariyer Yolcusu',desc:'Kariyer yolu seç',cond:s=>s.careerPicked},
+  {id:'xp50',icon:'⭐',name:'XP Toplayıcı',desc:'50 XP kazan',cond:s=>s.xp>=50},
+  {id:'xp200',icon:'🌟',name:'XP Ustası',desc:'200 XP kazan',cond:s=>s.xp>=200},
+  {id:'quiz5',icon:'🧠',name:'Quiz Aşığı',desc:'5 soruyu doğru yanıtla',cond:s=>s.correct>=5},
+  {id:'perfect',icon:'💎',name:'Mükemmeliyetçi',desc:'Tüm 8 soruyu doğru',cond:s=>s.correct>=8},
+];
+const LEVELS=[{min:0,name:'Çaylak'},{min:50,name:'Acemi'},{min:100,name:'Öğrenci'},{min:200,name:'Geliştirici'},{min:350,name:'Uzman'},{min:500,name:'Usta'}];
+const CAREERS=[
+  {id:'frontend',icon:'🎨',title:'Frontend',desc:'HTML, CSS, JS, React',steps:['HTML & CSS','JavaScript','React','TypeScript']},
+  {id:'backend',icon:'⚙️',title:'Backend',desc:'Python, SQL, API',steps:['Python','SQL','REST API','Docker']},
+  {id:'data',icon:'📊',title:'Veri Bilimi',desc:'Pandas, ML, AI',steps:['Python','Pandas','ML Temelleri','Derin Öğrenme']},
+  {id:'mobile',icon:'📱',title:'Mobil',desc:'React Native',steps:['JS Temelleri','React Native','Navigation','Store']},
+];
+const DUMMY_LB=[
+  {name:'ByteWolf',av:'🦊',xp:340,streak:7},{name:'CodeNinja',av:'🤖',xp:290,streak:5},
+  {name:'PythonPro',av:'🐍',xp:255,streak:4},{name:'JSMaster',av:'⚡',xp:210,streak:6},
+  {name:'AlgoKing',av:'🧑‍💻',xp:160,streak:3},{name:'SQLStar',av:'🗄️',xp:130,streak:2},
+];
+
+let S={xp:0,correct:0,total:0,streak:0,runs:0,reviews:0,aiAsked:0,careerPicked:false,earnedBadges:new Set()};
+let curQ=0,qAnswered=false,curLang='python',chatHistory=[],msgId=0,selectedCareer=null,completedSteps=new Set();
+
+// ── NAV ──
+function showPage(p){
+  document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
+  document.getElementById('page-'+p).classList.add('active');
+  document.querySelectorAll('.nav-link').forEach(x=>x.classList.remove('active'));
+  const nl=document.getElementById('nl-'+p);
+  if(nl) nl.classList.add('active');
+  window.scrollTo(0,0);
+  if(p==='badges')renderBadges();
+  if(p==='lb')renderLB();
+  if(p==='career')renderCareers();
+}
+function showHome(){ showPage('home'); }
+
+// ── STATE ──
+function addXP(n){ S.xp+=n; checkBadges(); updateUI(); }
+function checkBadges(){
+  for(const b of BADGES_DEF){
+    if(!S.earnedBadges.has(b.id)&&b.cond(S)){
+      S.earnedBadges.add(b.id);
+      showToast('🏅 Rozet: '+b.name);
+    }
+  }
+}
+function getLevel(xp){let l=LEVELS[0];for(const v of LEVELS)if(xp>=v.min)l=v;return l;}
+function getNextXP(xp){for(const v of LEVELS)if(xp<v.min)return v.min;return null;}
+function updateUI(){
+  document.getElementById('navXP').textContent=S.xp+' XP';
+  document.getElementById('navStreak').textContent=S.streak+'🔥';
+  document.getElementById('qzCorrect').textContent=S.correct;
+  document.getElementById('qzTotal').textContent=S.total;
+  document.getElementById('qzXP').textContent=S.xp;
+  document.getElementById('qzStreak').textContent=S.streak+'🔥';
+  const lv=getLevel(S.xp),next=getNextXP(S.xp),li=LEVELS.indexOf(lv);
+  const pct=next?Math.round((S.xp-lv.min)/(next-lv.min)*100):100;
+  const el=document.getElementById('levelTag'); if(el) el.textContent='Seviye '+(li+1)+' — '+lv.name;
+  const xl=document.getElementById('xpLbl'); if(xl) xl.textContent=S.xp+' XP';
+  const xb=document.getElementById('xpBar'); if(xb) xb.style.width=pct+'%';
+  const xn=document.getElementById('xpNext'); if(xn) xn.textContent=next?(next-S.xp)+' XP':'Maks!';
+}
+
+// ── QUIZ ──
+function loadQ(){
+  const q=QUESTIONS[curQ];
+  qAnswered=false;
+  document.getElementById('quizProg').style.width=(curQ/QUESTIONS.length*100)+'%';
+  document.getElementById('quizCnt').textContent=(curQ+1)+' / '+QUESTIONS.length;
+  const dk={'easy':'Kolay','medium':'Orta','hard':'Zor'};
+  const dc={'easy':'rgba(76,175,125,0.15)','medium':'rgba(245,200,66,0.12)','hard':'rgba(240,90,90,0.15)'};
+  const dtc={'easy':'#4caf7d','medium':'#f5c842','hard':'#f05a5a'};
+  const lc={'python':'rgba(76,175,125,0.15)','js':'rgba(245,200,66,0.12)','sql':'rgba(74,158,255,0.15)'};
+  const ltc={'python':'#4caf7d','js':'#f5c842','sql':'#4a9eff'};
+  document.getElementById('qMeta').innerHTML=`
+    <span class="q-badge" style="background:${lc[q.lk]};color:${ltc[q.lk]};">${q.lang}</span>
+    <span class="q-badge" style="background:${dc[q.dk]};color:${dtc[q.dk]};">${dk[q.dk]}</span>`;
+  document.getElementById('qText').textContent=q.text;
+  const ce=document.getElementById('qCode');
+  if(q.code){ce.style.display='block';ce.textContent=q.code;}else{ce.style.display='none';}
+  document.getElementById('qFeedback').className='q-feedback';
+  document.getElementById('qNext').style.display='none';
+  document.getElementById('qAIBox').style.display='none';
+  document.getElementById('qOpts').innerHTML=q.opts.map((o,i)=>`<button class="q-opt" onclick="answerQ(${i})">${o}</button>`).join('');
+}
+function answerQ(idx){
+  if(qAnswered)return;
+  qAnswered=true; S.total++;
+  const q=QUESTIONS[curQ];
+  document.querySelectorAll('.q-opt').forEach(o=>o.classList.add('disabled'));
+  document.querySelectorAll('.q-opt')[idx].classList.add(idx===q.correct?'correct':'wrong');
+  document.querySelectorAll('.q-opt')[q.correct].classList.add('correct');
+  const fb=document.getElementById('qFeedback');
+  if(idx===q.correct){S.correct++;S.streak++;addXP(q.xp);fb.className='q-feedback show correct';fb.textContent='✓ Doğru! +'+q.xp+' XP';}
+  else{S.streak=0;fb.className='q-feedback show wrong';fb.textContent='✗ Yanlış. Doğru: '+q.opts[q.correct];}
+  document.getElementById('qNext').style.display=curQ<QUESTIONS.length-1?'inline-block':'none';
+}
+function nextQ(){if(curQ<QUESTIONS.length-1){curQ++;loadQ();}}
+async function aiExplain(){
+  const q=QUESTIONS[curQ];
+  const box=document.getElementById('qAIBox');
+  box.style.display='block';box.innerHTML='<div class="typing-dots"><span></span><span></span><span></span></div>';
+  S.aiAsked++;checkBadges();
+  const r=await callAI(`"${q.text}" sorusu için kısa Türkçe açıklama yap. Doğru cevap: ${q.opts[q.correct]}`);
+  box.textContent=r;
+}
+
+// ── EDITOR ──
+function updateLN(){
+  const ta=document.getElementById('codeEd');const ln=document.getElementById('lineNums');
+  if(!ta||!ln)return;
+  ln.innerHTML=Array.from({length:ta.value.split('\n').length},(_,i)=>`<div class="line-num">${i+1}</div>`).join('');
+}
+function handleTab(e){if(e.key==='Tab'){e.preventDefault();const t=e.target,s=t.selectionStart;t.value=t.value.substring(0,s)+'  '+t.value.substring(t.selectionEnd);t.selectionStart=t.selectionEnd=s+2;updateLN();}}
+function setLang(lang,el){curLang=lang;document.querySelectorAll('.lang-btn').forEach(b=>b.classList.remove('active'));el.classList.add('active');const fns={python:'main.py',javascript:'main.js',sql:'query.sql'};document.getElementById('edFn').textContent=fns[lang];}
+async function runCode(){
+  const code=document.getElementById('codeEd').value.trim();if(!code)return;
+  document.getElementById('outBody').className='output-body';
+  document.getElementById('outBody').innerHTML='<div class="typing-dots"><span></span><span></span><span></span></div>';
+  document.getElementById('outStat').className='out-status out-idle';document.getElementById('outStat').textContent='Çalışıyor...';
+  S.runs++;checkBadges();
+  const r=await callAI(`Bu ${curLang} kodunu çalıştır, SADECE çıktıyı ver:\n${code}`);
+  const isErr=r.toLowerCase().includes('error')||r.toLowerCase().includes('traceback');
+  document.getElementById('outBody').className='output-body'+(isErr?' err':'');
+  document.getElementById('outBody').textContent=r;
+  document.getElementById('outStat').className='out-status '+(isErr?'out-err':'out-ok');
+  document.getElementById('outStat').textContent=isErr?'Hata':'Başarılı';
+  if(!isErr)addXP(5);
+}
+async function aiReview(){
+  const code=document.getElementById('codeEd').value.trim();if(!code){showToast('Önce kod yaz!');return;}
+  S.reviews++;checkBadges();
+  const box=document.getElementById('reviewBox');box.style.display='block';
+  box.innerHTML='<div class="typing-dots"><span></span><span></span><span></span></div>';
+  const r=await callAI(`Bu ${curLang} kodunu Türkçe incele. 1) Ne yapıyor 2) İyi yönler 3) Geliştirilebilecekler:\n${code}`);
+  box.textContent=r;addXP(10);
+}
+
+// ── CHAT ──
+async function sendChat(){
+  const inp=document.getElementById('chatInp');const text=inp.value.trim();if(!text)return;
+  inp.value='';S.aiAsked++;checkBadges();
+  appendMsg('user',text);chatHistory.push({role:'user',content:text});
+  const id=appendMsg('ai',null,true);
+  const r=await callAI(text,chatHistory.slice(0,-1));
+  updateMsg(id,r);chatHistory.push({role:'assistant',content:r});
+}
+function quickChat(t){document.getElementById('chatInp').value=t;sendChat();}
+function appendMsg(role,text,loading=false){
+  const id='m'+(++msgId);const area=document.getElementById('chatMsgs');
+  const now=new Date().toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'});
+  area.innerHTML+=`<div class="msg ${role}" id="${id}"><div class="msg-bubble">${loading?'<div class="typing-dots"><span></span><span></span><span></span></div>':text}</div><div class="msg-time">${now}</div></div>`;
+  area.scrollTop=area.scrollHeight;return id;
+}
+function updateMsg(id,text){const el=document.getElementById(id);if(el)el.querySelector('.msg-bubble').textContent=text;document.getElementById('chatMsgs').scrollTop=99999;}
+
+// ── CAREER ──
+function renderCareers(){
+  document.getElementById('careerGrid').innerHTML=CAREERS.map(c=>`
+    <div class="career-card${selectedCareer===c.id?' selected':''}" onclick="pickCareer('${c.id}')">
+      <span class="career-icon">${c.icon}</span>
+      <div class="career-title">${c.title}</div>
+      <div class="career-desc">${c.desc}</div>
+      ${selectedCareer===c.id?'<div style="font-size:11px;color:var(--purple2);margin-top:8px;font-family:var(--font-mono);">// seçildi</div>':''}
+    </div>`).join('');
+  if(selectedCareer) renderRoadmap();
+}
+async function pickCareer(id){
+  selectedCareer=id;S.careerPicked=true;checkBadges();addXP(20);renderCareers();
+  const c=CAREERS.find(x=>x.id===id);
+  const wrap=document.getElementById('roadmapWrap');
+  wrap.innerHTML=`<div class="card"><div class="card-title">${c.icon} ${c.title} Yol Haritası</div><div class="roadmap" id="rmSteps"></div></div>`;
+  document.getElementById('rmSteps').innerHTML=c.steps.map((s,i)=>{
+    const done=completedSteps.has(id+':'+i);
+    return`<div class="rm-step${done?' done':''}" onclick="completeStep('${id}',${i})">
+      <div class="rm-dot${done?' done':i===completedSteps.size?' active':''}">
+        ${done?'✓':''}
+      </div>
+      <div class="rm-info"><div class="rm-title">${s}</div><div class="rm-sub">${done?'Tamamlandı':'Başlamak için tıkla'}</div></div>
+      <div class="rm-xp">+${25*(i+1)} XP</div>
+    </div>`;
+  }).join('');
+}
+function completeStep(cid,idx){
+  const key=cid+':'+idx;if(completedSteps.has(key))return;
+  completedSteps.add(key);addXP(25*(idx+1));showToast('✅ Adım tamamlandı!');renderCareers();
+}
+
+// ── BADGES ──
+function renderBadges(){
+  const chk=`<svg viewBox="0 0 24 24" width="8" height="8" fill="white"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>`;
+  const earned=BADGES_DEF.filter(b=>S.earnedBadges.has(b.id));
+  const locked=BADGES_DEF.filter(b=>!S.earnedBadges.has(b.id));
+  document.getElementById('earnedBadges').innerHTML=earned.length?earned.map(b=>`
+    <div class="badge-card earned" style="position:relative;">
+      <div style="position:absolute;top:8px;right:8px;width:16px;height:16px;background:var(--purple);border-radius:50%;display:flex;align-items:center;justify-content:center;">${chk}</div>
+      <span class="badge-icon">${b.icon}</span>
+      <div class="badge-name">${b.name}</div>
+      <div class="badge-desc">${b.desc}</div>
+    </div>`).join(''):'<div style="font-size:13px;color:var(--text2);">Quiz çöz ve rozet kazan!</div>';
+  document.getElementById('lockedBadges').innerHTML=locked.map(b=>`
+    <div class="badge-card locked">
+      <span class="badge-icon">${b.icon}</span>
+      <div class="badge-name">${b.name}</div>
+      <div class="badge-desc">${b.desc}</div>
+    </div>`).join('');
+  updateUI();
+}
+
+// ── LEADERBOARD ──
+function renderLB(){
+  const me={name:'Sen',av:'🧑‍💻',xp:S.xp,streak:S.streak,isMe:true};
+  const all=[...DUMMY_LB,me].sort((a,b)=>b.xp-a.xp);
+  const medals=['🥇','🥈','🥉'];
+  document.getElementById('lbList').innerHTML=all.map((p,i)=>`
+    <div class="lb-row${p.isMe?' me':''}">
+      <div class="lb-rank">${i<3?medals[i]:i+1}</div>
+      <div class="lb-av">${p.av}</div>
+      <div class="lb-name">${p.name}${p.isMe?' (Sen)':''}</div>
+      <div class="lb-streak">${p.streak}🔥</div>
+      <div class="lb-xp">${p.xp} XP</div>
+    </div>`).join('');
+}
+
+// ── AI ──
+async function callAI(msg,hist=[]){
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:600,
+        system:'Sen CodeLearn platformunun AI asistanısın. Kodlama sorularını Türkçe, kısa ve net yanıtlarsın.',
+        messages:[...hist,{role:'user',content:msg}]})
+    });
+    const d=await res.json();
+    return d.content?.find(b=>b.type==='text')?.text||'Yanıt alınamadı.';
+  }catch(e){return 'Bağlantı hatası.';}
+}
+
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000);}
+
+// ── INIT ──
+loadQ();updateLN();updateUI();
+</script>
+</body>
+</html>
