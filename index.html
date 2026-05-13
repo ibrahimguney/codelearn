@@ -2,15 +2,24 @@
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
-  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CodeLearn AI — Kodlamayı Öğren</title>
 <meta name="description" content="AI destekli kodlama öğrenme platformu. Quiz, editör, kariyer yolu, sertifika ve daha fazlası.">
 <meta property="og:title" content="CodeLearn AI">
 <meta property="og:description" content="Kodlamayı öğrenmek için her şey bir arada.">
 <meta property="og:type" content="website">
+<!-- PWA -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#7f6ff0">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="CodeLearn">
+<link rel="apple-touch-icon" href="icon-192.png">
+<!-- Cache control -->
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -303,6 +312,7 @@ footer { border-top: 1px solid var(--border); padding: 32px 24px; display: flex;
     <button class="nav-link" id="nl-lb" onclick="showPage('lb')">Liderlik</button>
   </div>
   <div class="nav-right">
+    <button id="installBtn" onclick="installPWA()" style="display:none;background:linear-gradient(135deg,#7f6ff0,#a89cf7);color:#fff;border:none;padding:6px 12px;border-radius:var(--radius-sm);font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font);align-items:center;gap:4px;">📲 Yükle</button>
     <span class="xp-badge" id="navXP">0 XP</span>
     <span class="streak-badge" id="navStreak">0🔥</span>
   </div>
@@ -833,7 +843,41 @@ function showToast(msg){const t=document.getElementById('toast');t.textContent=m
 
 // ── INIT ──
 loadQ();updateLN();updateUI();
+
+// ── PWA: Service Worker & Install Prompt ──
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>{
+    navigator.serviceWorker.register('sw.js').catch(e=>console.log('SW kayit hatasi:',e));
+  });
+}
+
+let deferredPrompt=null;
+window.addEventListener('beforeinstallprompt',e=>{
+  e.preventDefault();
+  deferredPrompt=e;
+  const btn=document.getElementById('installBtn');
+  if(btn) btn.style.display='inline-flex';
+});
+
+async function installPWA(){
+  if(!deferredPrompt){
+    showToast('Tarayıcı menüsünden "Ana ekrana ekle" seçeneğini kullanabilirsin');
+    return;
+  }
+  deferredPrompt.prompt();
+  const {outcome}=await deferredPrompt.userChoice;
+  if(outcome==='accepted'){
+    showToast('Uygulama yüklendi! 🎉');
+    document.getElementById('installBtn').style.display='none';
+  }
+  deferredPrompt=null;
+}
+
+window.addEventListener('appinstalled',()=>{
+  showToast('CodeLearn ana ekrana eklendi 🚀');
+  const btn=document.getElementById('installBtn');
+  if(btn) btn.style.display='none';
+});
 </script>
 </body>
-  
 </html>
