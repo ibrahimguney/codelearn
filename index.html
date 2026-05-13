@@ -16,10 +16,11 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="CodeLearn">
 <link rel="apple-touch-icon" href="icon-192.png">
-<!-- Cache control -->
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
+<!-- Pyodide: tarayicida Python -->
+<script src="https://cdn.jsdelivr.net/pyodide/v0.26.2/full/pyodide.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -312,7 +313,7 @@ footer { border-top: 1px solid var(--border); padding: 32px 24px; display: flex;
     <button class="nav-link" id="nl-lb" onclick="showPage('lb')">Liderlik</button>
   </div>
   <div class="nav-right">
-    <button id="installBtn" onclick="installPWA()" style="display:none;background:linear-gradient(135deg,#7f6ff0,#a89cf7);color:#fff;border:none;padding:6px 12px;border-radius:var(--radius-sm);font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font);align-items:center;gap:4px;">📲 Yükle</button>
+    <button id="installBtn" onclick="installPWA()" style="display:none;background:linear-gradient(135deg,#7f6ff0,#a89cf7);color:#fff;border:none;padding:6px 12px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;align-items:center;gap:4px;">📲 Yükle</button>
     <span class="xp-badge" id="navXP">0 XP</span>
     <span class="streak-badge" id="navStreak">0🔥</span>
   </div>
@@ -413,12 +414,13 @@ footer { border-top: 1px solid var(--border); padding: 32px 24px; display: flex;
         <div class="ed-dot" style="background:#EF9F27;"></div>
         <div class="ed-dot" style="background:#4caf7d;"></div>
         <span class="ed-fn" id="edFn">main.py</span>
+        <span id="pyStatus" style="font-size:11px;color:#9d9d9d;font-family:var(--font-mono);margin-right:auto"></span>
         <div class="lang-btns">
           <button class="lang-btn active" onclick="setLang('python',this)">Python</button>
           <button class="lang-btn" onclick="setLang('javascript',this)">JavaScript</button>
           <button class="lang-btn" onclick="setLang('sql',this)">SQL</button>
         </div>
-        <button class="run-btn" onclick="runCode()">▶ Çalıştır</button>
+        <button class="run-btn" onclick="runCode()" id="runBtn">▶ Çalıştır</button>
       </div>
       <div class="editor-area">
         <div class="line-nums" id="lineNums"></div>
@@ -672,56 +674,91 @@ function updateLN(){
 }
 function handleTab(e){if(e.key==='Tab'){e.preventDefault();const t=e.target,s=t.selectionStart;t.value=t.value.substring(0,s)+'  '+t.value.substring(t.selectionEnd);t.selectionStart=t.selectionEnd=s+2;updateLN();}}
 function setLang(lang,el){curLang=lang;document.querySelectorAll('.lang-btn').forEach(b=>b.classList.remove('active'));el.classList.add('active');const fns={python:'main.py',javascript:'main.js',sql:'query.sql'};document.getElementById('edFn').textContent=fns[lang];}
-// Piston API ile gercek kod calistirma
-const PISTON_LANGS={python:{lang:'python',ver:'3.10.0'},javascript:{lang:'javascript',ver:'18.15.0'}};
+// ── PYODIDE (tarayicida Python) ──
+let pyodide=null,pyodideReady=false;
+async function initPyodide(){
+  try{
+    document.getElementById('pyStatus').textContent='⏳ Python yükleniyor...';
+    pyodide=await loadPyodide({indexURL:'https://cdn.jsdelivr.net/pyodide/v0.26.2/full/'});
+    document.getElementById('pyStatus').innerHTML='<span style="color:#4caf7d">✓ Python hazır</span>';
+    pyodideReady=true;
+  }catch(e){
+    document.getElementById('pyStatus').innerHTML='<span style="color:#e24b4a">✗ Python yüklenemedi</span>';
+  }
+}
+window.addEventListener('load',()=>{if(typeof loadPyodide!=='undefined')initPyodide();});
+
 async function runCode(){
   const code=document.getElementById('codeEd').value.trim();if(!code)return;
   document.getElementById('outBody').className='output-body';
   document.getElementById('outBody').innerHTML='<div class="typing-dots"><span></span><span></span><span></span></div>';
-  document.getElementById('outStat').className='out-status out-idle';document.getElementById('outStat').textContent='Çalışıyor...';
+  document.getElementById('outStat').className='out-status out-idle';
+  document.getElementById('outStat').textContent='Çalışıyor...';
   S.runs++;checkBadges();
-
-  // SQL icin Piston yok - AI ile aciklama olarak calistir
+  
+  // PYTHON: Pyodide ile tarayicida
+  if(curLang==='python'){
+    if(!pyodideReady){
+      document.getElementById('outBody').textContent='⏳ Python henüz yükleniyor, birkaç saniye bekle ve tekrar dene.';
+      document.getElementById('outStat').className='out-status out-idle';
+      document.getElementById('outStat').textContent='Bekleniyor';
+      return;
+    }
+    try{
+      let stdout='',stderr='';
+      pyodide.setStdout({batched:(s)=>{stdout+=s+'\n'}});
+      pyodide.setStderr({batched:(s)=>{stderr+=s+'\n'}});
+      await pyodide.runPythonAsync(code);
+      const output=stdout+(stderr?(stdout?'\n':'')+stderr:'');
+      const isErr=!!stderr;
+      document.getElementById('outBody').className='output-body'+(isErr?' err':'');
+      document.getElementById('outBody').textContent=output.trim()||'(çıktı yok — print() kullan)';
+      document.getElementById('outStat').className='out-status '+(isErr?'out-err':'out-ok');
+      document.getElementById('outStat').textContent=isErr?'Hata':'Başarılı';
+      if(!isErr)addXP(5);
+    }catch(e){
+      document.getElementById('outBody').className='output-body err';
+      document.getElementById('outBody').textContent=e.message;
+      document.getElementById('outStat').className='out-status out-err';
+      document.getElementById('outStat').textContent='Python Hatası';
+    }
+    return;
+  }
+  
+  // JAVASCRIPT: tarayicinin kendi motoru
+  if(curLang==='javascript'){
+    try{
+      let logs=[];
+      const origLog=console.log;
+      console.log=(...args)=>{logs.push(args.map(a=>typeof a==='object'?JSON.stringify(a):String(a)).join(' '))};
+      // Yalitilmis scope icin Function constructor
+      const fn=new Function(code);
+      fn();
+      console.log=origLog;
+      const output=logs.join('\n');
+      document.getElementById('outBody').className='output-body';
+      document.getElementById('outBody').textContent=output||'(çıktı yok — console.log() kullan)';
+      document.getElementById('outStat').className='out-status out-ok';
+      document.getElementById('outStat').textContent='Başarılı';
+      addXP(5);
+    }catch(e){
+      document.getElementById('outBody').className='output-body err';
+      document.getElementById('outBody').textContent=e.message;
+      document.getElementById('outStat').className='out-status out-err';
+      document.getElementById('outStat').textContent='JS Hatası';
+    }
+    return;
+  }
+  
+  // SQL: AI simulasyonu
   if(curLang==='sql'){
-    const r=await callAI(`Bu SQL sorgusunu hayali bir veritabaninda calistir ve TABLO formatinda sonuc goster. SADECE sonuc tablosunu ver, aciklama yapma:\n${code}`);
+    const r=await callAI(`Bu SQL sorgusunu hayali bir veritabaninda calistir. SADECE sonuc tablosunu ASCII tablo formatinda ver, aciklama yapma:\n${code}`);
     const isErr=r.toLowerCase().includes('hata')||r.toLowerCase().includes('error');
     document.getElementById('outBody').className='output-body'+(isErr?' err':'');
     document.getElementById('outBody').textContent=r;
     document.getElementById('outStat').className='out-status '+(isErr?'out-err':'out-ok');
     document.getElementById('outStat').textContent=isErr?'Hata':'Başarılı (Simülasyon)';
     if(!isErr)addXP(5);
-    return;
-  }
-
-  // Python / JavaScript icin Piston API
-  const cfg=PISTON_LANGS[curLang];
-  if(!cfg){
-    document.getElementById('outBody').className='output-body err';
-    document.getElementById('outBody').textContent='Desteklenmeyen dil: '+curLang;
-    document.getElementById('outStat').className='out-status out-err';
-    document.getElementById('outStat').textContent='Hata';
-    return;
-  }
-  try{
-    const res=await fetch('https://emkc.org/api/v2/piston/execute',{
-      method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({language:cfg.lang,version:cfg.ver,files:[{content:code}]})
-    });
-    const d=await res.json();
-    const stdout=(d.run&&d.run.stdout)||'';
-    const stderr=(d.run&&d.run.stderr)||'';
-    const output=stdout+(stderr?(stdout?'\n':'')+stderr:'');
-    const isErr=!!stderr||(d.run&&d.run.code!==0);
-    document.getElementById('outBody').className='output-body'+(isErr?' err':'');
-    document.getElementById('outBody').textContent=output||'(çıktı yok)';
-    document.getElementById('outStat').className='out-status '+(isErr?'out-err':'out-ok');
-    document.getElementById('outStat').textContent=isErr?'Hata':'Başarılı';
-    if(!isErr)addXP(5);
-  }catch(e){
-    document.getElementById('outBody').className='output-body err';
-    document.getElementById('outBody').textContent='Kod çalıştırma servisine ulaşılamadı: '+e.message;
-    document.getElementById('outStat').className='out-status out-err';
-    document.getElementById('outStat').textContent='Bağlantı Hatası';
   }
 }
 async function aiReview(){
@@ -829,12 +866,9 @@ async function callAI(msg,hist=[]){
         system:'Sen CodeLearn platformunun AI asistanısın. Kodlama sorularını Türkçe, kısa ve net yanıtlarsın.',
         messages:[...hist,{role:'user',content:msg}]})
     });
-    if(!res.ok){
-      const errText=await res.text();
-      return 'Sunucu hatası ('+res.status+'): '+errText.slice(0,200);
-    }
+    if(!res.ok){const t=await res.text();return 'Sunucu hatası ('+res.status+'): '+t.slice(0,200);}
     const d=await res.json();
-    if(d.error) return 'API hatası: '+(d.error.message||JSON.stringify(d.error));
+    if(d.error)return 'API hatası: '+(d.error.message||JSON.stringify(d.error));
     return d.content?.find(b=>b.type==='text')?.text||'Yanıt alınamadı.';
   }catch(e){return 'Bağlantı hatası: '+e.message;}
 }
@@ -844,40 +878,11 @@ function showToast(msg){const t=document.getElementById('toast');t.textContent=m
 // ── INIT ──
 loadQ();updateLN();updateUI();
 
-// ── PWA: Service Worker & Install Prompt ──
-if('serviceWorker' in navigator){
-  window.addEventListener('load',()=>{
-    navigator.serviceWorker.register('sw.js').catch(e=>console.log('SW kayit hatasi:',e));
-  });
-}
-
+// ── PWA ──
+if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))}
 let deferredPrompt=null;
-window.addEventListener('beforeinstallprompt',e=>{
-  e.preventDefault();
-  deferredPrompt=e;
-  const btn=document.getElementById('installBtn');
-  if(btn) btn.style.display='inline-flex';
-});
-
-async function installPWA(){
-  if(!deferredPrompt){
-    showToast('Tarayıcı menüsünden "Ana ekrana ekle" seçeneğini kullanabilirsin');
-    return;
-  }
-  deferredPrompt.prompt();
-  const {outcome}=await deferredPrompt.userChoice;
-  if(outcome==='accepted'){
-    showToast('Uygulama yüklendi! 🎉');
-    document.getElementById('installBtn').style.display='none';
-  }
-  deferredPrompt=null;
-}
-
-window.addEventListener('appinstalled',()=>{
-  showToast('CodeLearn ana ekrana eklendi 🚀');
-  const btn=document.getElementById('installBtn');
-  if(btn) btn.style.display='none';
-});
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;document.getElementById('installBtn').style.display='inline-flex'});
+async function installPWA(){if(!deferredPrompt){showToast('Tarayıcı menüsünden "Ana ekrana ekle" seçeneğini kullan');return}deferredPrompt.prompt();const{outcome}=await deferredPrompt.userChoice;if(outcome==='accepted'){showToast('Uygulama yüklendi! 🎉');document.getElementById('installBtn').style.display='none'}deferredPrompt=null}
 </script>
 </body>
 </html>
