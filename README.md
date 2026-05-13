@@ -31,6 +31,9 @@ Ya da GitHub Pages üzerinden yayınla → [DEPLOYMENT.md](DEPLOYMENT.md)
 
 ## 📄 Lisans
 
+
+
+
 MIT — özgürce kullan, düzenle, paylaş.
 
 ---
