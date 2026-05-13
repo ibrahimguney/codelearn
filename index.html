@@ -659,19 +659,57 @@ function updateLN(){
 }
 function handleTab(e){if(e.key==='Tab'){e.preventDefault();const t=e.target,s=t.selectionStart;t.value=t.value.substring(0,s)+'  '+t.value.substring(t.selectionEnd);t.selectionStart=t.selectionEnd=s+2;updateLN();}}
 function setLang(lang,el){curLang=lang;document.querySelectorAll('.lang-btn').forEach(b=>b.classList.remove('active'));el.classList.add('active');const fns={python:'main.py',javascript:'main.js',sql:'query.sql'};document.getElementById('edFn').textContent=fns[lang];}
+// Piston API ile gercek kod calistirma
+const PISTON_LANGS={python:{lang:'python',ver:'3.10.0'},javascript:{lang:'javascript',ver:'18.15.0'}};
 async function runCode(){
   const code=document.getElementById('codeEd').value.trim();if(!code)return;
   document.getElementById('outBody').className='output-body';
   document.getElementById('outBody').innerHTML='<div class="typing-dots"><span></span><span></span><span></span></div>';
   document.getElementById('outStat').className='out-status out-idle';document.getElementById('outStat').textContent='Çalışıyor...';
   S.runs++;checkBadges();
-  const r=await callAI(`Bu ${curLang} kodunu çalıştır, SADECE çıktıyı ver:\n${code}`);
-  const isErr=r.toLowerCase().includes('error')||r.toLowerCase().includes('traceback');
-  document.getElementById('outBody').className='output-body'+(isErr?' err':'');
-  document.getElementById('outBody').textContent=r;
-  document.getElementById('outStat').className='out-status '+(isErr?'out-err':'out-ok');
-  document.getElementById('outStat').textContent=isErr?'Hata':'Başarılı';
-  if(!isErr)addXP(5);
+
+  // SQL icin Piston yok - AI ile aciklama olarak calistir
+  if(curLang==='sql'){
+    const r=await callAI(`Bu SQL sorgusunu hayali bir veritabaninda calistir ve TABLO formatinda sonuc goster. SADECE sonuc tablosunu ver, aciklama yapma:\n${code}`);
+    const isErr=r.toLowerCase().includes('hata')||r.toLowerCase().includes('error');
+    document.getElementById('outBody').className='output-body'+(isErr?' err':'');
+    document.getElementById('outBody').textContent=r;
+    document.getElementById('outStat').className='out-status '+(isErr?'out-err':'out-ok');
+    document.getElementById('outStat').textContent=isErr?'Hata':'Başarılı (Simülasyon)';
+    if(!isErr)addXP(5);
+    return;
+  }
+
+  // Python / JavaScript icin Piston API
+  const cfg=PISTON_LANGS[curLang];
+  if(!cfg){
+    document.getElementById('outBody').className='output-body err';
+    document.getElementById('outBody').textContent='Desteklenmeyen dil: '+curLang;
+    document.getElementById('outStat').className='out-status out-err';
+    document.getElementById('outStat').textContent='Hata';
+    return;
+  }
+  try{
+    const res=await fetch('https://emkc.org/api/v2/piston/execute',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({language:cfg.lang,version:cfg.ver,files:[{content:code}]})
+    });
+    const d=await res.json();
+    const stdout=(d.run&&d.run.stdout)||'';
+    const stderr=(d.run&&d.run.stderr)||'';
+    const output=stdout+(stderr?(stdout?'\n':'')+stderr:'');
+    const isErr=!!stderr||(d.run&&d.run.code!==0);
+    document.getElementById('outBody').className='output-body'+(isErr?' err':'');
+    document.getElementById('outBody').textContent=output||'(çıktı yok)';
+    document.getElementById('outStat').className='out-status '+(isErr?'out-err':'out-ok');
+    document.getElementById('outStat').textContent=isErr?'Hata':'Başarılı';
+    if(!isErr)addXP(5);
+  }catch(e){
+    document.getElementById('outBody').className='output-body err';
+    document.getElementById('outBody').textContent='Kod çalıştırma servisine ulaşılamadı: '+e.message;
+    document.getElementById('outStat').className='out-status out-err';
+    document.getElementById('outStat').textContent='Bağlantı Hatası';
+  }
 }
 async function aiReview(){
   const code=document.getElementById('codeEd').value.trim();if(!code){showToast('Önce kod yaz!');return;}
@@ -768,18 +806,24 @@ function renderLB(){
     </div>`).join('');
 }
 
-// ── AI ──
+// ── AI (Cloudflare Worker proxy) ──
+const WORKER_URL='https://codelearn-ai.ibrahimguney16.workers.dev';
 async function callAI(msg,hist=[]){
   try{
-    const res=await fetch('https://api.anthropic.com/v1/messages',{
+    const res=await fetch(WORKER_URL,{
       method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:600,
+      body:JSON.stringify({model:'claude-sonnet-4-5',max_tokens:600,
         system:'Sen CodeLearn platformunun AI asistanısın. Kodlama sorularını Türkçe, kısa ve net yanıtlarsın.',
         messages:[...hist,{role:'user',content:msg}]})
     });
+    if(!res.ok){
+      const errText=await res.text();
+      return 'Sunucu hatası ('+res.status+'): '+errText.slice(0,200);
+    }
     const d=await res.json();
+    if(d.error) return 'API hatası: '+(d.error.message||JSON.stringify(d.error));
     return d.content?.find(b=>b.type==='text')?.text||'Yanıt alınamadı.';
-  }catch(e){return 'Bağlantı hatası.';}
+  }catch(e){return 'Bağlantı hatası: '+e.message;}
 }
 
 function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000);}
